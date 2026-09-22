@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+enum TaskStatus {
+  OPEN
+  OFFER_RECEIVED
+  PAYMENT_PENDING
+  ACTIVE
+  AWAITING_CONFIRMATION
+  COMPLETED
+  DISPUTED
+  CANCELLED
+}
+
+enum TransactionStatus {
+  DRAFT
+  POSTED
+  OFFER_RECEIVED
+  PROVIDER_SELECTED
+  PAYMENT_PENDING
+  PAYMENT_CONFIRMED
+  ACTIVE
+  IN_PROGRESS
+  SUBMITTED
+  AWAITING_CONFIRMATION
+  COMPLETED
+  DISPUTED
+  CANCELLED
+  REFUNDED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  PROCESSING
+  PAID
+  REJECTED
+}
+
+model User {
+  id                String         @id @default(cuid())
+  username          String         @unique
+  email             String         @unique
+  passwordHash      String
+  role              UserRole       @default(STUDENT)
+  college           String?
+  locality          String?
+  bio               String?
+  rating            Float          @default(0)
+  completedTasks    Int            @default(0)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  requestedTasks    Task[]         @relation("RequesterTasks")
+  providedOffers    Offer[]
+  providerTasks     Task[]         @relation("ProviderTasks")
+  sentMessages      Message[]
+  walletEntries     WalletEntry[]
+  notifications     Notification[]
+  withdrawals       Withdrawal[]
+  ratingsGiven      Rating[]       @relation("RatingsGiven")
+  ratingsReceived   Rating[]       @relation("RatingsReceived")
+}
+
+model Task {
+  id           String         @id @default(cuid())
+  title        String
+  category     String
+  description  String
+  locality     String
+  college      String?
+  deadline     DateTime
+  budget       Int
+  format       String
+  status       TaskStatus     @default(OPEN)
+  requesterId  String
+  providerId   String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  requester    User           @relation("RequesterTasks", fields: [requesterId], references: [id])
+  provider     User?          @relation("ProviderTasks", fields: [providerId], references: [id])
+  offers       Offer[]
+  transaction  Transaction?
+  messages     Message[]
+  dispute      Dispute?
+  ratings      Rating[]
+}
+
+model Offer {
+  id         String   @id @default(cuid())
+  amount     Int
+  eta        String
+  message    String
+  createdAt  DateTime @default(now())
+  taskId     String
+  providerId String
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  provider   User     @relation(fields: [providerId], references: [id])
+
+  @@unique([taskId, providerId])
+}
+
+model Transaction {
+  id          String            @id @default(cuid())
+  taskId      String            @unique
+  amount      Int
+  status      TransactionStatus  @default(DRAFT)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  task        Task              @relation(fields: [taskId], references: [id])
+  paymentEvents PaymentEvent[]
+}
+
+model PaymentEvent {
+  id            String      @id @default(cuid())
+  transactionId String
+  label         String
+  providerRef   String?
+  createdAt     DateTime    @default(now())
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  body      String
+  taskId    String
+  senderId  String
+  createdAt DateTime @default(now())
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  sender    User     @relation(fields: [senderId], references: [id])
+}
+
+model WalletEntry {
+  id        String   @id @default(cuid())
+  amount    Int
+  status    String
+  reason    String
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Withdrawal {
+  id          String           @id @default(cuid())
+  amount      Int
+  method      String
+  destination String
+  status      WithdrawalStatus  @default(PENDING)
+  userId      String
+  createdAt   DateTime         @default(now())
+  reviewedAt  DateTime?
+  user        User             @relation(fields: [userId], references: [id])
+}
+
+model Dispute {
+  id         String   @id @default(cuid())
+  reason     String
+  details    String?
+  resolution String?
+  taskId     String   @unique
+  createdAt  DateTime @default(now())
+  resolvedAt DateTime?
+  task       Task     @relation(fields: [taskId], references: [id])
+}
+
+model Rating {
+  id         String   @id @default(cuid())
+  score      Int
+  review     String?
+  taskId     String
+  authorId   String
+  recipientId String
+  createdAt  DateTime @default(now())
+  task       Task     @relation(fields: [taskId], references: [id])
+  author     User     @relation("RatingsGiven", fields: [authorId], references: [id])
+  recipient  User     @relation("RatingsReceived", fields: [recipientId], references: [id])
+
+  @@unique([taskId, authorId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  category  String
+  unread    Boolean  @default(true)
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
