@@ -37,7 +37,7 @@ export default function WithdrawPage() {
 
             <div>
               <label className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-500">UPI ID</label>
-              <input className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 py-3 text-sm text-zinc-700 outline-none" defaultValue="blackbeast@upi" />
+              <input className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 py-3 text-sm text-zinc-700 outline-none" placeholder="yourname@upi" />
             </div>
 
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">

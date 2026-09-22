@@ -70,8 +70,8 @@ export function CampusPulse() {
           </Link>
 
           <div className="mt-6 border-t-2 border-dashed border-[#172033]/20 pt-4 text-sm font-bold text-[#172033]">
-            “Found my design side quest here.”
-            <span className="mt-1 block text-xs font-semibold text-[#596477]">— someone from your campus</span>
+            Built for real student-to-student work.
+            <span className="mt-1 block text-xs font-semibold text-[#596477]">No seeded profiles. No placeholder activity.</span>
           </div>
         </div>
       </div>
