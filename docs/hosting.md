@@ -85,8 +85,12 @@ Start Command: npm run start
 ```text
 DATABASE_URL=your Supabase transaction pooler URL
 DIRECT_URL=your Supabase session pooler URL on port 5432
+SESSION_SECRET=a-long-random-secret
+INITIAL_ADMIN_EMAIL=the-email-that-should-own-first-admin-access
 NODE_ENV=production
 ```
+
+For the first admin account, set `INITIAL_ADMIN_EMAIL` to the exact email address before that user signs up or logs in. In your current setup, use the email you want to own administration. After login, open `/admin`; that account can promote or demote other registered users with one click. Keep `SESSION_SECRET` private and rotate it if it is ever exposed.
 
 7. Click **Create Web Service**.
 8. Wait for the first deploy to finish and open the generated `onrender.com` URL.

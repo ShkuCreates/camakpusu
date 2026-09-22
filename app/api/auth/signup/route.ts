@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { randomBytes, scryptSync } from "node:crypto";
 
 import { db } from "@/lib/db";
+import { setSession } from "@/lib/auth";
+import { Prisma } from "@prisma/client";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -18,12 +20,15 @@ export async function POST(request: Request) {
   const passwordHash = `${salt}:${scryptSync(password, salt, 64).toString("hex")}`;
 
   try {
-    await db.user.create({ data: { username: `@${username}`, email, passwordHash, college: college || null } });
-    return NextResponse.json({ created: true }, { status: 201 });
+    const role = email === process.env.INITIAL_ADMIN_EMAIL?.trim().toLowerCase() ? "ADMIN" : "STUDENT";
+    const user = await db.user.create({ data: { username: `@${username}`, email, passwordHash, college: college || null, role } });
+    await setSession(user.id);
+    return NextResponse.json({ created: true, role: user.role }, { status: 201 });
   } catch (error) {
-    const message = error instanceof Error && error.message.includes("Unique constraint")
-      ? "That username or email is already registered."
-      : "We could not create your account right now.";
-    return NextResponse.json({ error: message }, { status: 409 });
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ error: "That username or email is already registered." }, { status: 409 });
+    }
+    console.error("Signup failed", error);
+    return NextResponse.json({ error: "The account service is unavailable. Check the Render database connection." }, { status: 503 });
   }
 }
