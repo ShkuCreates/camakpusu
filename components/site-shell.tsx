@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -14,6 +15,14 @@ const navItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [user, setUser] = useState<{ username: string; role: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((response) => response.json())
+      .then((data) => setUser(data.user))
+      .catch(() => setUser(null));
+  }, []);
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(43,88,64,0.08),_transparent_24%),_#f7f4ef] text-zinc-900">
@@ -50,8 +59,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               
             </Link>
 
-            <Link href="/login" className="hidden rounded-full px-3 py-2 text-sm font-bold text-zinc-700 transition hover:bg-white/60 sm:inline-flex">Sign in</Link>
-            <Link href="/signup" className="liquid-control inline-flex px-4 py-2 text-sm font-bold text-zinc-800 transition">Create account</Link>
+            {user ? (
+              <Link href="/profile" className="liquid-control inline-flex items-center gap-2 px-3 py-2 text-sm font-bold text-zinc-800 transition">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-800">{user.username.replace("@", "").slice(0, 1).toUpperCase()}</span>
+                <span className="hidden sm:inline">{user.username}</span>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className="hidden rounded-full px-3 py-2 text-sm font-bold text-zinc-700 transition hover:bg-white/60 sm:inline-flex">Sign in</Link>
+                <Link href="/signup" className="liquid-control inline-flex px-4 py-2 text-sm font-bold text-zinc-800 transition">Create account</Link>
+              </>
+            )}
 
             <details className="relative hidden lg:block">
               <summary className="list-none">
