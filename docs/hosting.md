@@ -32,6 +32,8 @@ DIRECT_URL="postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supab
 
 In Supabase, choose **Session pooler**, not **Direct connection**, when copying the second URL. The host should end in `.pooler.supabase.com`, not `db.PROJECT_REF.supabase.co`.
 
+In Render, paste environment values without surrounding quote marks. `DATABASE_URL` must start with `postgresql://`; never use `file:./dev.db` in Render and do not paste `DATABASE_URL=` into the value field.
+
 ## 2. Prepare the repository
 
 From the project directory:

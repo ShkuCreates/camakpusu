@@ -16,6 +16,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Use a valid username, email, and password of at least 8 characters." }, { status: 400 });
   }
 
+  const databaseUrl = process.env.DATABASE_URL?.trim() ?? "";
+  if (!databaseUrl.startsWith("postgresql://") && !databaseUrl.startsWith("postgres://")) {
+    return NextResponse.json({ error: "Server database configuration is invalid. In Render, DATABASE_URL must start with postgresql:// and must not include quote marks." }, { status: 503 });
+  }
+
   const salt = randomBytes(16).toString("hex");
   const passwordHash = `${salt}:${scryptSync(password, salt, 64).toString("hex")}`;
 
