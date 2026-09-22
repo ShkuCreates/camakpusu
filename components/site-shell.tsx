@@ -7,8 +7,8 @@ const navItems = [
   { href: "/", label: "Home" },
   { href: "/browse", label: "Browse Tasks" },
   { href: "/post-task", label: "Post a Task" },
-  { href: "/dashboard", label: "My Tasks", unread: true },
-  { href: "/messages", label: "Messages", unread: true },
+  { href: "/dashboard", label: "My Tasks" },
+  { href: "/messages", label: "Messages" },
   { href: "/wallet", label: "Wallet" },
 ];
 
@@ -38,7 +38,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className={`relative rounded-full px-3 py-2 transition hover:text-zinc-900 ${pathname === item.href ? "liquid-nav-active text-zinc-900" : "text-zinc-600"}`}
               >
                 {item.label}
-                {item.unread && <span aria-label="New updates" className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />}
               </Link>
             ))}
           </nav>
@@ -48,13 +47,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9a6 6 0 1 0-12 0v.75a8.967 8.967 0 0 1-2.31 6.022c1.733.64 3.554 1.087 5.453 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
               </svg>
-              <span aria-label="2 unread notifications" className="absolute right-2 top-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-red-500" />
+              
             </Link>
 
-            <Link href="/profile" aria-label="Open @Blackbeast profile" className="liquid-control inline-flex cursor-pointer items-center gap-3 px-2 py-1.5 transition">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/80 bg-emerald-100 text-xs font-semibold text-emerald-800 shadow-inner">@B</span>
-              <span className="hidden text-sm font-bold text-zinc-800 sm:inline">@Blackbeast</span>
-            </Link>
+            <Link href="/login" className="hidden rounded-full px-3 py-2 text-sm font-bold text-zinc-700 transition hover:bg-white/60 sm:inline-flex">Sign in</Link>
+            <Link href="/signup" className="liquid-control inline-flex px-4 py-2 text-sm font-bold text-zinc-800 transition">Create account</Link>
 
             <details className="relative hidden lg:block">
               <summary className="list-none">
@@ -102,14 +99,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             </div>
           </details>
-          <Link href="/messages" className="relative flex flex-col items-center gap-1 text-[11px] font-medium text-zinc-600">
-            <span>Messages</span><span aria-label="New messages" className="absolute right-3 top-0 h-2 w-2 rounded-full bg-red-500" />
+          <Link href="/messages" className="flex flex-col items-center gap-1 text-[11px] font-medium text-zinc-600">
+            <span>Messages</span>
           </Link>
-          <Link href="/notifications" className="relative flex flex-col items-center gap-1 text-[11px] font-medium text-zinc-600">
-            <span>Alerts</span><span aria-label="New alerts" className="absolute right-2 top-0 h-2 w-2 rounded-full bg-red-500" />
+          <Link href="/notifications" className="flex flex-col items-center gap-1 text-[11px] font-medium text-zinc-600">
+            <span>Alerts</span>
           </Link>
-          <Link href="/profile" className="flex flex-col items-center gap-1 text-[11px] font-medium text-zinc-600">
-            <span>Profile</span>
+          <Link href="/login" className="flex flex-col items-center gap-1 text-[11px] font-medium text-zinc-600">
+            <span>Sign in</span>
           </Link>
         </div>
       </nav>

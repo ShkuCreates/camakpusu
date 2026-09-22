@@ -12,11 +12,11 @@ export default function LoginPage() {
         <div className="space-y-4">
           <div>
             <label className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-500">Username</label>
-            <input className="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-700 outline-none" defaultValue="@Blackbeast" />
+            <input placeholder="your username or email" className="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-700 outline-none" />
           </div>
           <div>
             <label className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-500">Password</label>
-            <input type="password" className="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-700 outline-none" defaultValue="password123" />
+            <input type="password" placeholder="Your password" className="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-700 outline-none" />
           </div>
         </div>
 

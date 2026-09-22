@@ -10,12 +10,12 @@ export default function PostTaskPage() {
   const [stepIndex, setStepIndex] = useState(0);
   const [form, setForm] = useState({
     category: "Assignments",
-    title: "Business Law Research",
-    description: "Need help organizing research material and preparing a structured document.",
-    deadline: "2026-09-28",
+    title: "",
+    description: "",
+    deadline: "",
     delivery: "Digital",
     locality: "Noida",
-    budget: "500",
+    budget: "",
     college: "",
   });
 
@@ -104,7 +104,7 @@ export default function PostTaskPage() {
               <div>
                 <label className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-500">Requirements</label>
                 <textarea
-                  defaultValue="Use recent case law where relevant, structure sources clearly, and return a clean editable file."
+                  placeholder="Add the details someone needs to do a great job"
                   className="mt-2 min-h-24 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 py-3 text-sm text-zinc-700 outline-none"
                 />
               </div>
@@ -222,9 +222,9 @@ export default function PostTaskPage() {
                 Continue
               </button>
             ) : (
-              <button className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white">
-                Post Task
-              </button>
+              <a href="/login" className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white">
+                Sign in to post
+              </a>
             )}
           </div>
         </div>

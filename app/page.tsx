@@ -60,9 +60,9 @@ export default function HomePage() {
         </section>
 
         <section className="grid gap-3 sm:grid-cols-3">
-          <div className="campus-stat"><span className="text-3xl">⚡</span><div><p className="text-2xl font-black text-[#172033]">₹84k+</p><p className="text-xs font-bold uppercase tracking-[0.12em] text-[#596477]">earned by students</p></div></div>
-          <div className="campus-stat"><span className="text-3xl">♡</span><div><p className="text-2xl font-black text-[#172033]">4.8/5</p><p className="text-xs font-bold uppercase tracking-[0.12em] text-[#596477]">community rating</p></div></div>
-          <div className="campus-stat"><span className="text-3xl">✦</span><div><p className="text-2xl font-black text-[#172033]">same day</p><p className="text-xs font-bold uppercase tracking-[0.12em] text-[#596477]">help can start here</p></div></div>
+          <div className="campus-stat"><span className="text-3xl">⚡</span><div><p className="text-2xl font-black text-[#172033]">Your brief</p><p className="text-xs font-bold uppercase tracking-[0.12em] text-[#596477]">becomes a real listing</p></div></div>
+          <div className="campus-stat"><span className="text-3xl">♡</span><div><p className="text-2xl font-black text-[#172033]">Your skill</p><p className="text-xs font-bold uppercase tracking-[0.12em] text-[#596477]">finds the right student</p></div></div>
+          <div className="campus-stat"><span className="text-3xl">✦</span><div><p className="text-2xl font-black text-[#172033]">Your pace</p><p className="text-xs font-bold uppercase tracking-[0.12em] text-[#596477]">starts when you are ready</p></div></div>
         </section>
 
         <section>

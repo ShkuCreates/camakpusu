@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { AppShell } from "@/components/site-shell";
-import { disputeReasons } from "@/lib/mock-data";
+
+const disputeReasons = ["Incomplete work", "Poor quality", "Late delivery", "Mismatch with requirements", "Other"];
 
 export default function CompletionPage() {
   const [stage, setStage] = useState<"complete" | "dispute">("complete");
@@ -12,7 +13,7 @@ export default function CompletionPage() {
       <div className="mx-auto max-w-5xl space-y-6">
         <section className="glass-panel rounded-[30px] p-6">
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">Completion flow</p>
-          <h1 className="mt-2 text-3xl font-semibold text-zinc-900">Business Law Research</h1>
+          <h1 className="mt-2 text-3xl font-semibold text-zinc-900">Complete a task</h1>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <button
@@ -48,7 +49,7 @@ export default function CompletionPage() {
 
               <div>
                 <label className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-500">Delivery proof</label>
-                <textarea className="mt-2 min-h-24 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 py-3 text-sm text-zinc-700 outline-none" defaultValue="Final summary attached. Case references added and formatting cleaned up." />
+                <textarea className="mt-2 min-h-24 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 py-3 text-sm text-zinc-700 outline-none" placeholder="Add delivery notes for the requester" />
               </div>
 
               <button className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white">
@@ -71,7 +72,7 @@ export default function CompletionPage() {
 
               <div>
                 <label className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-500">Description</label>
-                <textarea className="mt-2 min-h-28 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 py-3 text-sm text-zinc-700 outline-none" defaultValue="The final work did not include the required case citations and the structure was incomplete." />
+                <textarea className="mt-2 min-h-28 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 py-3 text-sm text-zinc-700 outline-none" placeholder="Explain what needs review" />
               </div>
 
               <div>
