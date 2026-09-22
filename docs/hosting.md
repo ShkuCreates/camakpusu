@@ -8,7 +8,7 @@ The local app uses SQLite for development. Before deploying, switch the Prisma d
 2. Choose a strong database password and select a region near your users.
 3. Open **Project Settings → Database → Connection string**.
 4. Copy the **Transaction pooler** URI for `DATABASE_URL`.
-5. Copy the **Direct connection** URI for `DIRECT_URL`.
+5. Copy the **Session pooler** URI for `DIRECT_URL`.
 6. Replace the password placeholders and URL-encode special password characters. For example, `@` becomes `%40`.
 
 Before the first production deploy, edit `prisma/schema.prisma`:
@@ -25,10 +25,12 @@ Use this shape:
 
 ```env
 DATABASE_URL="postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supabase.com:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://postgres.PROJECT_REF:PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres"
+DIRECT_URL="postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-REGION.pooler.supabase.com:5432/postgres"
 ```
 
-`DATABASE_URL` is pooled for the running app. `DIRECT_URL` is used by Prisma for schema operations.
+`DATABASE_URL` uses the transaction pooler on port `6543` for the running app. `DIRECT_URL` uses the session pooler on port `5432` for Prisma schema operations. The session pooler avoids the IPv6 connectivity problem that can cause Render error `P1001` with the `db.PROJECT_REF.supabase.co` host.
+
+In Supabase, choose **Session pooler**, not **Direct connection**, when copying the second URL. The host should end in `.pooler.supabase.com`, not `db.PROJECT_REF.supabase.co`.
 
 ## 2. Prepare the repository
 
@@ -82,7 +84,7 @@ Start Command: npm run start
 
 ```text
 DATABASE_URL=your Supabase transaction pooler URL
-DIRECT_URL=your Supabase direct connection URL
+DIRECT_URL=your Supabase session pooler URL on port 5432
 NODE_ENV=production
 ```
 
