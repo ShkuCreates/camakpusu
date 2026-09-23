@@ -25,7 +25,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(43,88,64,0.08),_transparent_24%),_#f7f4ef] text-zinc-900">
+    <div className="min-h-dvh overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(43,88,64,0.08),_transparent_24%),_#f7f4ef] text-zinc-900">
       <header className="sticky top-0 z-40 px-3 py-2 sm:px-5">
         <div className="liquid-header mx-auto flex max-w-7xl items-center justify-between gap-4 px-3 py-2 sm:px-5">
           <Link href="/" className="flex items-center gap-3">
@@ -92,14 +92,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 lg:px-8">{children}</main>
+      <main className="mx-auto max-w-7xl px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:px-8 lg:pb-10 lg:pt-6">{children}</main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-zinc-200/80 bg-[#f7f4ef]/90 px-3 py-2 backdrop-blur-xl lg:hidden">
-        <div className="mx-auto flex max-w-md items-center justify-between gap-2">
-          <Link href="/" className="flex flex-col items-center gap-1 text-[11px] font-medium text-zinc-600">
+      <nav className="mobile-tabbar fixed inset-x-0 bottom-0 z-50 px-3 pt-2 lg:hidden">
+        <div className="mx-auto flex max-w-md items-stretch justify-between gap-1 pb-[env(safe-area-inset-bottom)]">
+          <Link href="/" className={`mobile-tab ${pathname === "/" ? "mobile-tab-active" : ""}`} aria-current={pathname === "/" ? "page" : undefined}>
             <span>Home</span>
           </Link>
-          <Link href="/browse" className="flex flex-col items-center gap-1 text-[11px] font-medium text-zinc-600">
+          <Link href="/browse" className={`mobile-tab ${pathname === "/browse" ? "mobile-tab-active" : ""}`} aria-current={pathname === "/browse" ? "page" : undefined}>
             <span>Browse</span>
           </Link>
           <details className="relative">
@@ -117,14 +117,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             </div>
           </details>
-          <Link href="/messages" className="flex flex-col items-center gap-1 text-[11px] font-medium text-zinc-600">
+          <Link href="/messages" className={`mobile-tab ${pathname === "/messages" ? "mobile-tab-active" : ""}`} aria-current={pathname === "/messages" ? "page" : undefined}>
             <span>Messages</span>
           </Link>
-          <Link href="/notifications" className="flex flex-col items-center gap-1 text-[11px] font-medium text-zinc-600">
+          <Link href="/notifications" className={`mobile-tab ${pathname === "/notifications" ? "mobile-tab-active" : ""}`} aria-current={pathname === "/notifications" ? "page" : undefined}>
             <span>Alerts</span>
           </Link>
-          <Link href="/login" className="flex flex-col items-center gap-1 text-[11px] font-medium text-zinc-600">
-            <span>Sign in</span>
+          <Link href={user ? "/profile" : "/login"} className={`mobile-tab ${pathname === "/profile" || pathname === "/login" ? "mobile-tab-active" : ""}`}>
+            <span>{user ? "Profile" : "Sign in"}</span>
           </Link>
         </div>
       </nav>

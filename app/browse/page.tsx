@@ -79,7 +79,7 @@ export default function BrowsePage() {
               <button
                 key={filter}
                 onClick={() => setSelectedFilter(filter)}
-                className={filter === selectedFilter ? "rounded-full bg-zinc-900 px-3 py-2 text-xs font-medium text-white" : "rounded-full border border-zinc-200 bg-white/80 px-3 py-2 text-xs font-medium text-zinc-700"}
+                className={filter === selectedFilter ? "min-h-11 rounded-full bg-zinc-900 px-3 py-2 text-xs font-medium text-white" : "min-h-11 rounded-full border border-zinc-200 bg-white/80 px-3 py-2 text-xs font-medium text-zinc-700"}
               >
                 {filter}
               </button>
@@ -106,7 +106,7 @@ export default function BrowsePage() {
                 <select
                   value={selectedCategory}
                   onChange={(event) => setSelectedCategory(event.target.value)}
-                  className="mt-2 w-full rounded-xl border border-zinc-200 bg-white/80 px-3 py-2.5 text-sm text-zinc-700 outline-none"
+                  className="mt-2 min-h-11 w-full rounded-xl border border-zinc-200 bg-white/80 px-3 py-2.5 text-sm text-zinc-700 outline-none"
                 >
                   <option value="All">All categories</option>
                   {categoryOptions.map((category) => <option key={category}>{category}</option>)}
@@ -118,7 +118,7 @@ export default function BrowsePage() {
                 <select
                   value={locality}
                   onChange={(event) => setLocality(event.target.value)}
-                  className="mt-2 w-full rounded-xl border border-zinc-200 bg-white/80 px-3 py-2.5 text-sm text-zinc-700 outline-none"
+                  className="mt-2 min-h-11 w-full rounded-xl border border-zinc-200 bg-white/80 px-3 py-2.5 text-sm text-zinc-700 outline-none"
                 >
                   <option>All localities</option>
                   {localityOptions.map((place) => <option key={place}>{place}</option>)}
@@ -130,14 +130,14 @@ export default function BrowsePage() {
                 <input
                   value={collegeSearch}
                   onChange={(event) => setCollegeSearch(event.target.value)}
-                  className="mt-2 w-full rounded-xl border border-zinc-200 bg-white/80 px-3 py-2.5 text-sm text-zinc-700 outline-none"
+                  className="mt-2 min-h-11 w-full rounded-xl border border-zinc-200 bg-white/80 px-3 py-2.5 text-sm text-zinc-700 outline-none"
                   placeholder="Search your college"
                 />
-                <div className="mt-2 max-h-44 space-y-1 overflow-y-auto pr-1">
+                <div className="mt-2 max-h-44 space-y-1 overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin] [-webkit-overflow-scrolling:touch]">
                   <button
                     type="button"
                     onClick={() => setSelectedCollege("All colleges")}
-                    className={`flex w-full items-center rounded-xl px-2 py-2 text-left text-xs font-semibold ${selectedCollege === "All colleges" ? "bg-zinc-900 text-white" : "text-zinc-600 hover:bg-white"}`}
+                    className={`flex min-h-11 w-full items-center rounded-xl px-2 py-2 text-left text-xs font-semibold ${selectedCollege === "All colleges" ? "bg-zinc-900 text-white" : "text-zinc-600 hover:bg-white"}`}
                   >
                     All colleges
                   </button>
@@ -146,7 +146,7 @@ export default function BrowsePage() {
                       key={college.name}
                       type="button"
                       onClick={() => setSelectedCollege(college.name)}
-                      className={`flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold ${selectedCollege === college.name ? "bg-zinc-900 text-white" : "text-zinc-700 hover:bg-white"}`}
+                      className={`flex min-h-11 w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold ${selectedCollege === college.name ? "bg-zinc-900 text-white" : "text-zinc-700 hover:bg-white"}`}
                     >
                       <img src={`https://www.google.com/s2/favicons?domain=${college.domain}&sz=32`} alt="" className="h-5 w-5 rounded-full bg-white" />
                       <span className="min-w-0 truncate">{college.name}</span>
@@ -167,7 +167,7 @@ export default function BrowsePage() {
                     <button
                       key={value}
                       onClick={() => setDelivery(value)}
-                      className={delivery === value ? "rounded-full bg-zinc-900 px-3 py-2 text-xs font-medium text-white" : "rounded-full border border-zinc-200 bg-white/80 px-3 py-2 text-xs font-medium text-zinc-700"}
+                      className={delivery === value ? "min-h-11 rounded-full bg-zinc-900 px-3 py-2 text-xs font-medium text-white" : "min-h-11 rounded-full border border-zinc-200 bg-white/80 px-3 py-2 text-xs font-medium text-zinc-700"}
                     >
                       {label}
                     </button>

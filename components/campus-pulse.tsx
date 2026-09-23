@@ -61,7 +61,7 @@ export function CampusPulse() {
 
           <div className="mt-6 min-h-[174px] transition-all" key={mode}>
             <span className="inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#172033]" style={{ backgroundColor: current.accent }}>{current.label}</span>
-            <p className="mt-4 text-3xl font-black leading-none tracking-[-0.05em] text-[#172033]">{current.title}</p>
+            <p className="mt-4 text-2xl font-black leading-tight tracking-[-0.04em] text-[#172033] sm:text-3xl">{current.title}</p>
             <p className="mt-3 text-sm font-semibold leading-6 text-[#596477]">{current.body}</p>
           </div>
 

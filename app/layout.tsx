@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
 
@@ -10,6 +10,13 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "CampusAid | Student marketplace",
   description: "A local student marketplace for getting help, finding work, and getting things done.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#f9f8f4",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

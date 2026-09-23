@@ -25,7 +25,7 @@ export default function HomePage() {
                 <span className="text-sm font-semibold text-[#596477]">You bring the skill. We bring the people.</span>
               </div>
 
-              <h1 className="mt-6 max-w-3xl text-5xl font-black leading-[0.96] tracking-[-0.055em] text-[#172033] sm:text-6xl lg:text-8xl">
+              <h1 className="mt-6 max-w-3xl text-[2.75rem] font-black leading-[0.98] tracking-[-0.04em] text-[#172033] sm:text-6xl sm:tracking-[-0.055em] lg:text-8xl">
                 Your deadline
                 <span className="relative mx-2 inline-block text-[#4968ff]">
                   called.

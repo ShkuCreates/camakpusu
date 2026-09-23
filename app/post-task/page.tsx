@@ -176,31 +176,31 @@ export default function PostTaskPage() {
             <div className="rounded-[26px] border border-zinc-200 bg-zinc-50 p-5">
               <h2 className="text-xl font-semibold text-zinc-900">Task preview</h2>
               <div className="mt-5 space-y-3 text-sm text-zinc-700">
-                <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2">
+                <div className="grid gap-1 rounded-xl border border-zinc-200 bg-white px-3 py-2 sm:grid-cols-[auto_1fr] sm:items-center sm:gap-4">
                   <span>Title</span>
-                  <span className="font-semibold text-zinc-900">{finalSummary.title}</span>
+                  <span className="break-words font-semibold text-zinc-900 sm:text-right">{finalSummary.title}</span>
                 </div>
-                <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2">
                   <span>Category</span>
                   <span className="font-semibold text-zinc-900">{finalSummary.category}</span>
                 </div>
-                <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2">
                   <span>Delivery</span>
                   <span className="font-semibold text-zinc-900">{finalSummary.delivery}</span>
                 </div>
-                <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2">
                   <span>Deadline</span>
                   <span className="font-semibold text-zinc-900">{finalSummary.deadline}</span>
                 </div>
-                <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2">
                   <span>Budget</span>
                   <span className="font-semibold text-zinc-900">₹{finalSummary.budget}</span>
                 </div>
-                <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2">
                   <span>Locality</span>
                   <span className="font-semibold text-zinc-900">{finalSummary.locality}</span>
                 </div>
-                <div className="flex items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-white px-3 py-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2">
                   <span>College</span>
                   <span className="text-right font-semibold text-zinc-900">{finalSummary.college || "Not selected"}</span>
                 </div>
