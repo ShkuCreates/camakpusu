@@ -34,13 +34,28 @@ type Analytics = {
   activeUsers: number;
 };
 
+type DiscountCode = {
+  id: string;
+  code: string;
+  discountPercent: number;
+  maxUses: number;
+  currentUses: number;
+  expiresAt: string | null;
+  isActive: boolean;
+  createdAt: string;
+};
+
 export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [addFundsUserId, setAddFundsUserId] = useState<string | null>(null);
+  const [addFundsAmount, setAddFundsAmount] = useState("");
+  const [newDiscountCode, setNewDiscountCode] = useState({ code: "", discountPercent: 10, maxUses: 100, expiresAt: "" });
 
   useEffect(() => {
     loadData();
@@ -49,10 +64,11 @@ export default function AdminPage() {
   async function loadData() {
     setLoading(true);
     try {
-      const [usersResponse, withdrawalsResponse, analyticsResponse] = await Promise.all([
+      const [usersResponse, withdrawalsResponse, analyticsResponse, discountsResponse] = await Promise.all([
         fetch("/api/admin/users"),
         fetch("/api/admin/withdrawals"),
-        fetch("/api/admin/analytics")
+        fetch("/api/admin/analytics"),
+        fetch("/api/admin/discounts")
       ]);
 
       if (!usersResponse.ok) {
@@ -62,10 +78,12 @@ export default function AdminPage() {
       const usersData = await usersResponse.json();
       const withdrawalsData = await withdrawalsResponse.json();
       const analyticsData = await analyticsResponse.json();
+      const discountsData = await discountsResponse.json();
 
       setUsers(usersData);
       setWithdrawals(withdrawalsData.withdrawals);
       setAnalytics(analyticsData);
+      setDiscountCodes(discountsData);
       setError("");
     } catch (reason: any) {
       setError(reason.message);
@@ -74,12 +92,15 @@ export default function AdminPage() {
     }
   }
 
-  async function userAction(userId: string, action: string) {
+  async function userAction(userId: string, action: string, amount?: number) {
     setMessage("");
+    const body: any = { userId, action };
+    if (amount !== undefined) body.amount = amount;
+    
     const response = await fetch("/api/admin/users", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, action })
+      body: JSON.stringify(body)
     });
 
     if (response.ok) {
@@ -106,6 +127,41 @@ export default function AdminPage() {
     } else {
       const result = await response.json();
       setMessage(result.error || "Action failed");
+    }
+  }
+
+  async function createDiscountCode() {
+    setMessage("");
+    const response = await fetch("/api/admin/discounts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newDiscountCode)
+    });
+
+    if (response.ok) {
+      setMessage("Discount code created successfully");
+      setNewDiscountCode({ code: "", discountPercent: 10, maxUses: 100, expiresAt: "" });
+      await loadData();
+    } else {
+      const result = await response.json();
+      setMessage(result.error || "Failed to create discount code");
+    }
+  }
+
+  async function toggleDiscountCode(id: string, isActive: boolean) {
+    setMessage("");
+    const response = await fetch("/api/admin/discounts", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, isActive })
+    });
+
+    if (response.ok) {
+      setMessage(`Discount code ${isActive ? "activated" : "deactivated"}`);
+      await loadData();
+    } else {
+      const result = await response.json();
+      setMessage(result.error || "Failed to update discount code");
     }
   }
 
@@ -198,6 +254,12 @@ export default function AdminPage() {
                         >
                           Logout
                         </button>
+                        <button
+                          onClick={() => setAddFundsUserId(user.id)}
+                          className="text-xs font-black text-emerald-700 hover:underline"
+                        >
+                          Add Funds
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -278,6 +340,131 @@ export default function AdminPage() {
             </div>
           </div>
         </section>
+
+        <section className="liquid-panel rounded-[30px] p-6">
+          <h2 className="text-xl font-black text-[#172033]">Discount Codes</h2>
+          <div className="mt-4 space-y-4">
+            <div className="rounded-2xl bg-white/60 p-4">
+              <h3 className="font-bold text-[#172033]">Create New Discount Code</h3>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-widest text-[#596477]">Code</label>
+                  <input
+                    type="text"
+                    value={newDiscountCode.code}
+                    onChange={(e) => setNewDiscountCode({ ...newDiscountCode, code: e.target.value.toUpperCase() })}
+                    placeholder="CAMPUS10"
+                    className="mt-2 min-h-11 w-full rounded-2xl border border-white/80 bg-white/65 px-3 text-sm outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-widest text-[#596477]">Discount %</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={newDiscountCode.discountPercent}
+                    onChange={(e) => setNewDiscountCode({ ...newDiscountCode, discountPercent: Number(e.target.value) })}
+                    className="mt-2 min-h-11 w-full rounded-2xl border border-white/80 bg-white/65 px-3 text-sm outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-widest text-[#596477]">Max Uses</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newDiscountCode.maxUses}
+                    onChange={(e) => setNewDiscountCode({ ...newDiscountCode, maxUses: Number(e.target.value) })}
+                    className="mt-2 min-h-11 w-full rounded-2xl border border-white/80 bg-white/65 px-3 text-sm outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-widest text-[#596477]">Expires (optional)</label>
+                  <input
+                    type="date"
+                    value={newDiscountCode.expiresAt}
+                    onChange={(e) => setNewDiscountCode({ ...newDiscountCode, expiresAt: e.target.value })}
+                    className="mt-2 min-h-11 w-full rounded-2xl border border-white/80 bg-white/65 px-3 text-sm outline-none"
+                  />
+                </div>
+              </div>
+              <button
+                onClick={createDiscountCode}
+                className="mt-4 genz-button px-5 py-3 text-sm font-black"
+              >
+                Create Discount Code
+              </button>
+            </div>
+
+            <div className="space-y-3 max-h-64 overflow-y-auto">
+              {discountCodes.map((code) => (
+                <div key={code.id} className="flex items-center justify-between rounded-2xl bg-white/60 p-4">
+                  <div>
+                    <p className="font-bold text-[#172033]">{code.code}</p>
+                    <p className="text-xs text-[#596477]">
+                      {code.discountPercent}% discount · {code.currentUses}/{code.maxUses} uses
+                      {code.expiresAt && ` · Expires: ${new Date(code.expiresAt).toLocaleDateString()}`}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => toggleDiscountCode(code.id, !code.isActive)}
+                    className={`text-xs font-black px-3 py-2 rounded-full ${
+                      code.isActive ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {code.isActive ? "Active" : "Inactive"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Add Funds Modal */}
+        {addFundsUserId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="liquid-panel w-full max-w-md rounded-[30px] p-6">
+              <h3 className="text-xl font-black text-[#172033]">Add Funds to User Wallet</h3>
+              <div className="mt-4 space-y-4">
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-widest text-[#596477]">Amount (₹)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={addFundsAmount}
+                    onChange={(e) => setAddFundsAmount(e.target.value)}
+                    placeholder="Enter amount"
+                    className="mt-2 min-h-11 w-full rounded-2xl border border-white/80 bg-white/65 px-3 text-sm outline-none"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setAddFundsUserId(null);
+                      setAddFundsAmount("");
+                    }}
+                    className="flex-1 rounded-full border border-[#172033] px-4 py-3 text-sm font-black text-[#172033]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      const amount = Number(addFundsAmount);
+                      if (amount > 0 && addFundsUserId) {
+                        userAction(addFundsUserId, "addFunds", amount);
+                        setAddFundsUserId(null);
+                        setAddFundsAmount("");
+                      }
+                    }}
+                    className="flex-1 genz-button px-4 py-3 text-sm font-black"
+                  >
+                    Add Funds
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AppShell>
   );

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Footer } from "@/components/footer";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -93,7 +94,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:px-8 lg:pb-10 lg:pt-6">{children}</main>
+      <main className="mx-auto max-w-7xl px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:px-8 lg:pb-32 lg:pt-6">{children}</main>
+
+      <Footer />
 
       <nav className="mobile-tabbar fixed inset-x-0 bottom-0 z-50 px-3 pt-2 lg:hidden">
         <div className="mx-auto flex max-w-md items-stretch justify-between gap-1 pb-[env(safe-area-inset-bottom)]">

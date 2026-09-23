@@ -10,7 +10,8 @@
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
     "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
@@ -24,6 +25,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.19.2",
     "typescript": "^5.9.3"
   },
   "devDependencies": {

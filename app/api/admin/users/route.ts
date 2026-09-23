@@ -95,6 +95,34 @@ export async function PATCH(request: Request) {
         where: { id: userId },
         select: { id: true, username: true, email: true }
       });
+    } else if (action === "addFunds") {
+      const amount = typeof body?.amount === "number" ? body.amount : 0;
+      if (amount <= 0) {
+        return NextResponse.json({ error: "Amount must be greater than 0" }, { status: 400 });
+      }
+      
+      await db.walletEntry.create({
+        data: {
+          userId,
+          amount: amount,
+          status: "AVAILABLE",
+          reason: "Admin bonus added"
+        }
+      });
+      
+      await db.notification.create({
+        data: {
+          userId,
+          title: "Funds added to wallet",
+          body: `An admin has added ₹${amount} to your wallet. You can now withdraw these funds.`,
+          category: "Wallet"
+        }
+      });
+      
+      user = await db.user.findUnique({
+        where: { id: userId },
+        select: { id: true, username: true, email: true }
+      });
     } else {
       return NextResponse.json({ error: "Invalid action." }, { status: 400 });
     }
