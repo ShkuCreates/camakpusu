@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 export async function GET() {
   try {
     const tasks = await db.task.findMany({
-      where: { status: { in: ["OPEN", "OFFER_RECEIVED"] } },
+      where: { status: { in: ["OPEN", "OFFER_RECEIVED", "PAYMENT_PENDING", "ACTIVE", "AWAITING_CONFIRMATION"] } },
       include: { requester: { select: { username: true, college: true } } },
       orderBy: { createdAt: "desc" },
     });
@@ -18,6 +18,7 @@ export async function GET() {
         category: task.category,
         description: task.description,
         requester: task.requester.username,
+        provider: task.providerId ?? null,
         locality: task.locality,
         deadline: task.deadline.toISOString(),
         budget: task.budget,

@@ -16,7 +16,7 @@ type TaskBrief = {
   role: "posted" | "assigned";
 };
 
-const badgeForStatus: Record<string, string> = {
+const statusBadge: Record<string, string> = {
   OPEN: "bg-sky-100 text-sky-800",
   OFFER_RECEIVED: "bg-amber-100 text-amber-800",
   PAYMENT_PENDING: "bg-orange-100 text-orange-800",
@@ -26,6 +26,9 @@ const badgeForStatus: Record<string, string> = {
   DISPUTED: "bg-rose-100 text-rose-800",
   CANCELLED: "bg-zinc-200 text-zinc-700",
 };
+
+const ACTIVE_STATUSES = new Set(["OPEN", "OFFER_RECEIVED", "PAYMENT_PENDING", "ACTIVE", "AWAITING_CONFIRMATION"]);
+const HISTORY_STATUSES = new Set(["COMPLETED", "DISPUTED", "CANCELLED"]);
 
 function prettyDate(value: string) {
   const d = new Date(value);
@@ -49,9 +52,18 @@ export default function DashboardPage() {
         setUser(currentUser);
 
         if (currentUser && Array.isArray(list)) {
-          const posted = list.filter((t: any) => t.requester === currentUser.username).map((t: any) => ({ ...t, role: "posted" as const }));
-          const assigned: TaskBrief[] = [];
-          setTasks([...posted, ...assigned].sort((a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf()));
+          const posted = list
+            .filter((t: any) => t.requester === currentUser.username)
+            .map((t: any) => ({ ...t, role: "posted" as const }));
+          const assigned = Array.isArray(list)
+            ? list
+                .filter((t: any) => t.provider && currentUser.id && t.provider === currentUser.id)
+                .map((t: any) => ({ ...t, role: "assigned" as const }))
+            : [];
+          const all = [...posted, ...assigned].sort(
+            (a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf(),
+          );
+          setTasks(all);
         }
       } finally {
         setLoaded(true);
@@ -87,6 +99,41 @@ export default function DashboardPage() {
     );
   }
 
+  const active = tasks.filter((t) => ACTIVE_STATUSES.has(t.status));
+  const history = tasks.filter((t) => HISTORY_STATUSES.has(t.status));
+
+  function TaskRow({ task }: { task: TaskBrief }) {
+    return (
+      <Link
+        key={task.id}
+        href={`/task/${task.id}`}
+        className="glass-panel group flex flex-col justify-between gap-4 rounded-[26px] p-5 transition hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgba(15,23,42,0.08)] md:flex-row md:items-center"
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className={`rounded-full px-2.5 py-1 font-bold capitalize ${statusBadge[task.status] ?? "bg-zinc-100 text-zinc-700"}`}>
+              {task.status.replace(/_/g, " ").toLowerCase()}
+            </span>
+            <span className="rounded-full bg-zinc-100 px-2.5 py-1 font-bold text-zinc-700">
+              {task.role === "posted" ? "You posted" : "Assigned to you"}
+            </span>
+          </div>
+          <h3 className="mt-2 truncate text-lg font-bold text-[#172033] group-hover:text-[#4968ff]">{task.title}</h3>
+          <p className="mt-1 text-xs text-[#596477]">
+            Posted {prettyDate(task.createdAt)} · Deadline {prettyDate(task.deadline)}
+          </p>
+        </div>
+        <div className="flex items-center gap-4 md:gap-6">
+          <div className="text-right">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#596477]">Budget</p>
+            <p className="text-xl font-black text-[#172033]">₹{task.budget}</p>
+          </div>
+          <span className="liquid-action inline-flex h-10 w-10 items-center justify-center rounded-full text-white">→</span>
+        </div>
+      </Link>
+    );
+  }
+
   return (
     <AppShell>
       <div className="mx-auto max-w-6xl space-y-8">
@@ -109,37 +156,39 @@ export default function DashboardPage() {
             </div>
           </section>
         ) : (
-          <div className="grid gap-4">
-            {tasks.map((task) => (
-              <Link
-                key={task.id}
-                href={`/task/${task.id}`}
-                className="glass-panel group flex flex-col justify-between gap-4 rounded-[26px] p-5 transition hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgba(15,23,42,0.08)] md:flex-row md:items-center"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2 text-xs">
-                    <span className={`rounded-full px-2.5 py-1 font-bold capitalize ${badgeForStatus[task.status] ?? "bg-zinc-100 text-zinc-700"}`}>
-                      {task.status.replace(/_/g, " ").toLowerCase()}
-                    </span>
-                    <span className="rounded-full bg-zinc-100 px-2.5 py-1 font-bold text-zinc-700">
-                      {task.role === "posted" ? "You posted" : "Assigned to you"}
-                    </span>
-                  </div>
-                  <h3 className="mt-2 truncate text-lg font-bold text-[#172033] group-hover:text-[#4968ff]">{task.title}</h3>
-                  <p className="mt-1 text-xs text-[#596477]">
-                    Posted {prettyDate(task.createdAt)} · Deadline {prettyDate(task.deadline)}
-                  </p>
+          <>
+            <section>
+              <div className="mb-3 flex items-end justify-between">
+                <h2 className="text-xl font-black text-[#172033]">Active {active.length ? `(${active.length})` : ""}</h2>
+                <p className="text-xs text-[#596477]">Work you're currently doing or waiting on.</p>
+              </div>
+              {active.length === 0 ? (
+                <div className="glass-panel rounded-[26px] p-6 text-center text-sm text-[#596477]">
+                  No active tasks right now. Anything below is already finished.
                 </div>
-                <div className="flex items-center gap-4 md:gap-6">
-                  <div className="text-right">
-                    <p className="text-xs font-bold uppercase tracking-widest text-[#596477]">Budget</p>
-                    <p className="text-xl font-black text-[#172033]">₹{task.budget}</p>
-                  </div>
-                  <span className="liquid-action inline-flex h-10 w-10 items-center justify-center rounded-full text-white">→</span>
+              ) : (
+                <div className="grid gap-4">
+                  {active.map((task) => <TaskRow key={task.id} task={task} />)}
                 </div>
-              </Link>
-            ))}
-          </div>
+              )}
+            </section>
+
+            <section>
+              <div className="mb-3 flex items-end justify-between">
+                <h2 className="text-xl font-black text-[#172033]">History {history.length ? `(${history.length})` : ""}</h2>
+                <p className="text-xs text-[#596477]">Completed, cancelled, and disputed tasks.</p>
+              </div>
+              {history.length === 0 ? (
+                <div className="glass-panel rounded-[26px] p-6 text-center text-sm text-[#596477]">
+                  No finished tasks yet. Once a task is completed or cancelled, it appears here.
+                </div>
+              ) : (
+                <div className="grid gap-4 opacity-95">
+                  {history.map((task) => <TaskRow key={task.id} task={task} />)}
+                </div>
+              )}
+            </section>
+          </>
         )}
       </div>
     </AppShell>

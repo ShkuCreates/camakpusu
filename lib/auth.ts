@@ -8,7 +8,6 @@ const sessionSecret = process.env.SESSION_SECRET ?? "development-only-change-me"
 
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 90;
 const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 90;
-const REFRESH_THRESHOLD_MS = 1000 * 60 * 60 * 24;
 
 type SessionPayload = { userId: string; exp: number };
 
@@ -53,19 +52,11 @@ export async function clearSession() {
   cookieStore.delete(sessionCookie);
 }
 
-export async function refreshSessionIfNeeded(session: SessionPayload) {
-  if (session.exp - Date.now() < REFRESH_THRESHOLD_MS) {
-    await setSession(session.userId);
-  }
-}
-
 export async function getCurrentUser() {
   const cookieStore = await cookies();
   const token = cookieStore.get(sessionCookie)?.value;
   const session = token ? verifySessionToken(token) : null;
   if (!session) return null;
-
-  await refreshSessionIfNeeded(session);
 
   return db.user.findUnique({ where: { id: session.userId } });
 }

@@ -45,11 +45,24 @@ type DiscountCode = {
   createdAt: string;
 };
 
+type AdminTask = {
+  id: string;
+  title: string;
+  category: string;
+  status: string;
+  budget: number;
+  requester: string;
+  provider: string | null;
+  createdAt: string;
+  deadline: string;
+};
+
 export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>([]);
+  const [tasks, setTasks] = useState<AdminTask[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -64,11 +77,12 @@ export default function AdminPage() {
   async function loadData() {
     setLoading(true);
     try {
-      const [usersResponse, withdrawalsResponse, analyticsResponse, discountsResponse] = await Promise.all([
+      const [usersResponse, withdrawalsResponse, analyticsResponse, discountsResponse, tasksResponse] = await Promise.all([
         fetch("/api/admin/users"),
         fetch("/api/admin/withdrawals"),
         fetch("/api/admin/analytics"),
-        fetch("/api/admin/discounts")
+        fetch("/api/admin/discounts"),
+        fetch("/api/tasks"),
       ]);
 
       if (!usersResponse.ok) {
@@ -79,11 +93,13 @@ export default function AdminPage() {
       const withdrawalsData = await withdrawalsResponse.json();
       const analyticsData = await analyticsResponse.json();
       const discountsData = await discountsResponse.json();
+      const tasksData = await tasksResponse.json().catch(() => []);
 
       setUsers(usersData);
       setWithdrawals(withdrawalsData.withdrawals);
       setAnalytics(analyticsData);
       setDiscountCodes(discountsData);
+      setTasks(Array.isArray(tasksData) ? tasksData : []);
       setError("");
     } catch (reason: any) {
       setError(reason.message);
@@ -110,6 +126,19 @@ export default function AdminPage() {
     } else {
       const result = await response.json();
       setMessage(result.error || "Action failed");
+    }
+  }
+
+  async function deleteTask(id: string) {
+    if (!confirm("Delete this task permanently? This will also remove offers, messages, ratings, and transactions attached to it.")) return;
+    setMessage("");
+    const response = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+    if (response.ok) {
+      setMessage("Task deleted");
+      setTasks((current) => current.filter((t) => t.id !== id));
+    } else {
+      const result = await response.json().catch(() => ({}));
+      setMessage(result.error || "Failed to delete task");
     }
   }
 
@@ -338,6 +367,49 @@ export default function AdminPage() {
                 <p className="py-8 text-center text-sm text-[#596477]">No withdrawal requests pending.</p>
               )}
             </div>
+          </div>
+        </section>
+
+        <section className="liquid-panel rounded-[30px] p-6">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-black text-[#172033]">All tasks</h2>
+              <p className="mt-1 text-sm text-[#596477]">Delete spam, scams, or tasks that violate policy. All related data (offers, messages, transactions) is cleaned up automatically.</p>
+            </div>
+            <span className="text-xs font-bold uppercase tracking-widest text-[#596477]">{tasks.length} total</span>
+          </div>
+          <div className="mt-4 max-h-[480px] space-y-3 overflow-y-auto">
+            {tasks.length === 0 ? (
+              <p className="py-8 text-center text-sm text-[#596477]">No tasks loaded.</p>
+            ) : (
+              tasks.map((task) => (
+                <div key={task.id} className="flex flex-wrap items-start justify-between gap-3 rounded-2xl bg-white/60 p-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold capitalize ${
+                        task.status === "OPEN" || task.status === "OFFER_RECEIVED" ? "bg-sky-100 text-sky-800"
+                        : task.status === "COMPLETED" ? "bg-emerald-100 text-emerald-800"
+                        : task.status === "CANCELLED" || task.status === "DISPUTED" ? "bg-rose-100 text-rose-800"
+                        : "bg-amber-100 text-amber-800"
+                      }`}>
+                        {task.status.replace(/_/g, " ").toLowerCase()}
+                      </span>
+                      <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-bold text-zinc-700">{task.category}</span>
+                    </div>
+                    <p className="mt-2 truncate font-bold text-[#172033]">{task.title}</p>
+                    <p className="mt-1 text-xs text-[#596477]">
+                      {task.requester} → {task.provider ?? "no provider"} · ₹{task.budget} · Posted {new Date(task.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <a href={`/task/${task.id}`} target="_blank" rel="noopener noreferrer" className="text-xs font-black text-[#4968ff] hover:underline">View</a>
+                    <button onClick={() => deleteTask(task.id)} className="rounded-full bg-rose-50 px-3 py-1.5 text-xs font-black text-rose-700 hover:bg-rose-100">
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </section>
 

@@ -6,27 +6,40 @@ import { db } from "@/lib/db";
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  
-  // Get the latest user data from database to ensure accurate ratings and completed tasks
-  const freshUser = await db.user.findUnique({
-    where: { id: user.id },
-    select: {
-      id: true,
-      username: true,
-      email: true,
-      college: true,
-      locality: true,
-      bio: true,
-      rating: true,
-      completedTasks: true,
-      role: true,
-      createdAt: true
-    }
-  });
-  
+
+  const [freshUser, postedCount, assignedCount, completedCount, receivedRatings] = await Promise.all([
+    db.user.findUnique({
+      where: { id: user.id },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        college: true,
+        locality: true,
+        bio: true,
+        rating: true,
+        completedTasks: true,
+        role: true,
+        createdAt: true,
+      },
+    }),
+    db.task.count({ where: { requesterId: user.id } }),
+    db.task.count({ where: { providerId: user.id } }),
+    db.task.count({ where: { OR: [{ requesterId: user.id, status: "COMPLETED" }, { providerId: user.id, status: "COMPLETED" }] } }),
+    db.rating.count({ where: { recipientId: user.id } }),
+  ]);
+
   if (!freshUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
-  
-  return NextResponse.json({ user: freshUser });
+
+  return NextResponse.json({
+    user: freshUser,
+    stats: {
+      postedTasks: postedCount,
+      assignedTasks: assignedCount,
+      completedTasks: completedCount,
+      receivedRatings,
+    },
+  });
 }
 
 export async function PATCH(request: Request) {

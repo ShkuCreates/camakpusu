@@ -41,7 +41,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const updated = await db.$transaction(async (tx) => {
-    const result = await tx.task.update({ where: { id }, data: { status: "COMPLETED" } });
+    const result = await tx.task.update({ where: { id }, data: { status: "COMPLETED", completedAt: new Date() } });
     if (task.transaction) {
       await tx.transaction.update({ 
         where: { id: task.transaction.id }, 
@@ -59,7 +59,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             reason: `Completed task ${task.id}${discountApplied > 0 ? ` (₹${discountApplied} discount applied)` : ""}` 
           } 
         });
-        await tx.user.update({ where: { id: task.providerId }, data: { completedTasks: { increment: 1 } } });
+        const completedCount = await tx.task.count({ where: { providerId: task.providerId, status: "COMPLETED" } });
+        const receivedRatings = await tx.rating.findMany({ where: { recipientId: task.providerId } });
+        const avgRating = receivedRatings.length > 0
+          ? receivedRatings.reduce((sum, r) => sum + r.score, 0) / receivedRatings.length
+          : 0;
+        await tx.user.update({
+          where: { id: task.providerId },
+          data: {
+            completedTasks: completedCount,
+            rating: Math.round(avgRating * 100) / 100,
+          },
+        });
       }
     }
     if (task.providerId) {
@@ -70,6 +81,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           body: `${user.username} confirmed your work. Your earnings of ₹${finalAmount} are now available.${discountApplied > 0 ? ` ₹${discountApplied} discount was applied.` : ""}`, 
           category: "Wallet" 
         } 
+      });
+    }
+    if (task.requesterId) {
+      await tx.notification.create({
+        data: {
+          userId: task.requesterId,
+          title: "Task completed",
+          body: `Thanks for confirming "${task.title}". Remember to rate your provider — it helps the whole campus community.`,
+          category: "Tasks",
+        },
       });
     }
     return result;
