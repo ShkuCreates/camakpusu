@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { FormEvent, useMemo, useState, useEffect } from "react";
 import { AppShell } from "@/components/site-shell";
 import { categoryOptions, collegeOptions, localityOptions } from "@/lib/college-data";
 
@@ -8,6 +9,10 @@ const steps = ["What do you need?", "Describe it", "When & where?", "Review"];
 
 export default function PostTaskPage() {
   const [stepIndex, setStepIndex] = useState(0);
+  const [user, setUser] = useState<{ id: string; username: string } | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     category: "Assignments",
     title: "",
@@ -18,6 +23,16 @@ export default function PostTaskPage() {
     budget: "",
     college: "",
   });
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d) => {
+        setUser(d.user ?? null);
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
+  }, []);
 
   const finalSummary = useMemo(
     () => ({
@@ -35,10 +50,67 @@ export default function PostTaskPage() {
   const goNext = () => setStepIndex((current) => Math.min(current + 1, steps.length - 1));
   const goBack = () => setStepIndex((current) => Math.max(current - 1, 0));
 
+  async function submitTask(event: FormEvent) {
+    event.preventDefault();
+    setSubmitting(true);
+    setMessage("");
+    const response = await fetch("/api/tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: form.title,
+        description: form.description,
+        category: form.category,
+        locality: form.locality,
+        format: form.delivery,
+        budget: Number(form.budget),
+        deadline: form.deadline,
+        college: form.college,
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+    setSubmitting(false);
+    if (!response.ok) {
+      setMessage(result.error ?? "Could not post your task.");
+    } else {
+      window.location.href = `/task/${result.id}`;
+    }
+  }
+
+  if (!loaded) {
+    return (
+      <AppShell>
+        <div className="mx-auto max-w-4xl">
+          <div className="glass-panel rounded-[30px] p-6 md:p-8">
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">Loading…</p>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (!user) {
+    return (
+      <AppShell>
+        <section className="liquid-panel mx-auto max-w-3xl rounded-[30px] p-8 text-center">
+          <p className="genz-kicker justify-center">Post a task</p>
+          <h1 className="mt-3 text-3xl font-black text-[#172033]">Sign in to post your request</h1>
+          <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-[#596477]">
+            Once you're signed in you can post tasks, track offers, and follow up with providers until the job is done.
+          </p>
+          <div className="mt-6 flex justify-center gap-3">
+            <Link href="/login" className="genz-button px-5 py-3 text-sm font-black">Sign in</Link>
+            <Link href="/signup" className="rounded-full border-2 border-[#172033] px-5 py-3 text-sm font-black text-[#172033]">Create account</Link>
+          </div>
+        </section>
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell>
       <div className="mx-auto max-w-4xl">
-        <div className="glass-panel rounded-[30px] p-6 md:p-8">
+        <form onSubmit={submitTask} className="glass-panel rounded-[30px] p-6 md:p-8">
           <div className="mb-6">
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-500">Post a task</p>
             <h1 className="mt-2 text-3xl font-semibold text-zinc-900">Tell us what you need</h1>
@@ -88,6 +160,7 @@ export default function PostTaskPage() {
               <div>
                 <label className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-500">Title</label>
                 <input
+                  required
                   value={form.title}
                   onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
                   className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 py-3 text-sm text-zinc-700 outline-none"
@@ -96,6 +169,7 @@ export default function PostTaskPage() {
               <div>
                 <label className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-500">Description</label>
                 <textarea
+                  required
                   value={form.description}
                   onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
                   className="mt-2 min-h-32 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 py-3 text-sm text-zinc-700 outline-none"
@@ -117,14 +191,19 @@ export default function PostTaskPage() {
                 <label className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-500">Deadline</label>
                 <input
                   type="date"
+                  required
                   value={form.deadline}
                   onChange={(event) => setForm((current) => ({ ...current, deadline: event.target.value }))}
                   className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 py-3 text-sm text-zinc-700 outline-none"
                 />
               </div>
               <div>
-                <label className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-500">Budget</label>
+                <label className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-500">Budget (₹)</label>
                 <input
+                  type="number"
+                  min={1}
+                  step={1}
+                  required
                   value={form.budget}
                   onChange={(event) => setForm((current) => ({ ...current, budget: event.target.value }))}
                   className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 py-3 text-sm text-zinc-700 outline-none"
@@ -178,7 +257,7 @@ export default function PostTaskPage() {
               <div className="mt-5 space-y-3 text-sm text-zinc-700">
                 <div className="grid gap-1 rounded-xl border border-zinc-200 bg-white px-3 py-2 sm:grid-cols-[auto_1fr] sm:items-center sm:gap-4">
                   <span>Title</span>
-                  <span className="break-words font-semibold text-zinc-900 sm:text-right">{finalSummary.title}</span>
+                  <span className="break-words font-semibold text-zinc-900 sm:text-right">{finalSummary.title || "—"}</span>
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2">
                   <span>Category</span>
@@ -190,11 +269,11 @@ export default function PostTaskPage() {
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2">
                   <span>Deadline</span>
-                  <span className="font-semibold text-zinc-900">{finalSummary.deadline}</span>
+                  <span className="font-semibold text-zinc-900">{finalSummary.deadline || "—"}</span>
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2">
                   <span>Budget</span>
-                  <span className="font-semibold text-zinc-900">₹{finalSummary.budget}</span>
+                  <span className="font-semibold text-zinc-900">₹{finalSummary.budget || "—"}</span>
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2">
                   <span>Locality</span>
@@ -208,8 +287,11 @@ export default function PostTaskPage() {
             </div>
           )}
 
+          {message && <p role="alert" className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-3 py-3 text-sm font-medium text-red-700">{message}</p>}
+
           <div className="mt-8 flex justify-between gap-3">
             <button
+              type="button"
               onClick={goBack}
               disabled={stepIndex === 0}
               className="rounded-full border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 disabled:cursor-not-allowed disabled:opacity-40"
@@ -218,16 +300,16 @@ export default function PostTaskPage() {
             </button>
 
             {stepIndex < steps.length - 1 ? (
-              <button onClick={goNext} className="rounded-full bg-zinc-900 px-5 py-3 text-sm font-semibold text-white">
+              <button type="button" onClick={goNext} className="rounded-full bg-zinc-900 px-5 py-3 text-sm font-semibold text-white">
                 Continue
               </button>
             ) : (
-              <a href="/login" className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white">
-                Sign in to post
-              </a>
+              <button type="submit" disabled={submitting} className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white disabled:opacity-70">
+                {submitting ? "Posting…" : "Post task"}
+              </button>
             )}
           </div>
-        </div>
+        </form>
       </div>
     </AppShell>
   );

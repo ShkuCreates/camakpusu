@@ -25,6 +25,9 @@ export default function SignupPage() {
       setError(result.error ?? "We could not create your account.");
     } else {
       setSuccess(true);
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 1200);
     }
     setLoading(false);
   }
@@ -40,9 +43,8 @@ export default function SignupPage() {
 
         {success ? (
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center">
-            <p className="text-lg font-bold text-emerald-900">You are in ✦</p>
-            <p className="mt-2 text-sm leading-6 text-emerald-800">Your account was created. Log in to start using CampusAid.</p>
-            <Link href="/login" className="mt-5 inline-flex rounded-full bg-[#172033] px-5 py-3 text-sm font-bold text-white">Go to login</Link>
+            <p className="text-lg font-bold text-emerald-900">Welcome aboard ✦</p>
+            <p className="mt-2 text-sm leading-6 text-emerald-800">Your account was created. Taking you to your dashboard…</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">

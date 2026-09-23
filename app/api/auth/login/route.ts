@@ -20,7 +20,16 @@ export async function POST(request: Request) {
 
   if (!identifier || !password) return NextResponse.json({ error: "Enter your username or email and password." }, { status: 400 });
 
-  const user = await db.user.findFirst({ where: { OR: [{ email: identifier }, { username: identifier.startsWith("@") ? identifier : `@${identifier}` }] } });
+  const normalizedUsername = identifier.startsWith("@") ? identifier : `@${identifier}`;
+  const user = await db.user.findFirst({
+    where: {
+      OR: [
+        { email: identifier },
+        { username: normalizedUsername },
+        { username: identifier },
+      ],
+    },
+  });
   if (!user || !matchesPassword(password, user.passwordHash)) return NextResponse.json({ error: "The login details are not valid." }, { status: 401 });
 
   const bootstrapEmail = process.env.INITIAL_ADMIN_EMAIL?.trim().toLowerCase();

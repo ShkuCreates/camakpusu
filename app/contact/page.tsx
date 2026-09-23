@@ -13,7 +13,7 @@ export default function ContactPage() {
         <div className="mt-8 space-y-6">
           <div>
             <h3 className="font-bold text-[#172033]">Email</h3>
-            <p className="text-sm text-[#596477]">support@campusaid.com</p>
+            <p className="text-sm text-[#596477]">support@campusaid.online</p>
           </div>
           
           <div>
