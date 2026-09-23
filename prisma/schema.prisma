@@ -83,6 +83,9 @@ model Task {
   budget       Int
   format       String
   status       TaskStatus     @default(OPEN)
+  completionNotes String?
+  completionFiles String?
+  completedAt  DateTime?
   requesterId  String
   providerId   String?
   createdAt    DateTime       @default(now())

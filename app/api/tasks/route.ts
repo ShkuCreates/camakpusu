@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function GET() {
   try {
@@ -32,6 +33,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const body = await request.json().catch(() => null);
   const title = typeof body?.title === "string" ? body.title.trim() : "";
   const description = typeof body?.description === "string" ? body.description.trim() : "";
@@ -41,7 +44,7 @@ export async function POST(request: Request) {
   const college = typeof body?.college === "string" ? body.college.trim() : "";
   const budget = typeof body?.budget === "number" ? body.budget : Number(body?.budget);
   const deadline = typeof body?.deadline === "string" ? new Date(body.deadline) : null;
-  const requesterId = typeof body?.requesterId === "string" ? body.requesterId : "";
+  const requesterId = currentUser.id;
 
   if (!title || !description || !category || !locality || !format || !college || !requesterId || !Number.isInteger(budget) || budget <= 0 || !deadline || Number.isNaN(deadline.valueOf())) {
     return NextResponse.json({ error: "Invalid task payload" }, { status: 400 });

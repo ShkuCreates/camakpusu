@@ -11,6 +11,7 @@ const navItems = [
   { href: "/dashboard", label: "My Tasks" },
   { href: "/messages", label: "Messages" },
   { href: "/wallet", label: "Wallet" },
+  { href: "/admin", label: "Admin", adminOnly: true },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -39,7 +40,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           <nav className="hidden items-center gap-7 text-sm font-bold text-zinc-700 lg:flex">
-            {navItems.slice(1).map((item) => (
+            {navItems.filter(item => !item.adminOnly || user?.role === "ADMIN").map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -115,6 +116,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Link href="/browse" className="mt-2 block rounded-xl px-3 py-3 text-sm text-zinc-700 transition hover:bg-zinc-100">
                 <span className="block font-semibold text-zinc-900">Find Work</span>
               </Link>
+              {user?.role === "ADMIN" && (
+                <Link href="/admin" className="mt-2 block rounded-xl px-3 py-3 text-sm text-zinc-700 transition hover:bg-zinc-100">
+                  <span className="block font-semibold text-zinc-900">Admin Panel</span>
+                </Link>
+              )}
             </div>
           </details>
           <Link href="/messages" className={`mobile-tab ${pathname === "/messages" ? "mobile-tab-active" : ""}`} aria-current={pathname === "/messages" ? "page" : undefined}>

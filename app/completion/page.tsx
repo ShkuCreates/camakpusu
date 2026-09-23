@@ -2,11 +2,18 @@
 
 import { useState } from "react";
 import { AppShell } from "@/components/site-shell";
+import { FormEvent, useState } from "react";
 
 const disputeReasons = ["Incomplete work", "Poor quality", "Late delivery", "Mismatch with requirements", "Other"];
 
 export default function CompletionPage() {
   const [stage, setStage] = useState<"complete" | "dispute">("complete");
+  const [taskId, setTaskId] = useState("");
+  const [message, setMessage] = useState("");
+  async function complete(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); const data = new FormData(event.currentTarget);
+    const response = await fetch(`/api/tasks/${taskId}/complete`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ notes: data.get("notes"), files: data.get("files") }) }); const result = await response.json(); setMessage(response.ok ? "Work submitted. The requester can now confirm it." : result.error);
+  }
 
   return (
     <AppShell>
@@ -37,26 +44,26 @@ export default function CompletionPage() {
         </section>
 
         {stage === "complete" ? (
-          <section className="glass-panel rounded-[30px] p-6">
+          <form onSubmit={complete} className="glass-panel rounded-[30px] p-6">
             <h2 className="text-xl font-semibold text-zinc-900">Submit completion</h2>
             <div className="mt-5 space-y-4">
+              <input value={taskId} onChange={(event) => setTaskId(event.target.value)} required placeholder="Completed task ID" className="min-h-11 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 text-sm outline-none" />
               <div>
                 <label className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-500">Completed files</label>
-                <div className="mt-2 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-500">
-                  Upload PDF, DOCX, or presentation files
-                </div>
+                <input name="files" placeholder="File links (optional)" className="mt-2 min-h-11 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 text-sm outline-none" />
               </div>
 
               <div>
                 <label className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-500">Delivery proof</label>
-                <textarea className="mt-2 min-h-24 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 py-3 text-sm text-zinc-700 outline-none" placeholder="Add delivery notes for the requester" />
+                <textarea name="notes" className="mt-2 min-h-24 w-full rounded-2xl border border-zinc-200 bg-white/80 px-3 py-3 text-sm text-zinc-700 outline-none" placeholder="Add delivery notes for the requester" />
               </div>
 
               <button className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white">
                 Mark completed
               </button>
+              {message && <p className="text-sm font-semibold text-emerald-700">{message}</p>}
             </div>
-          </section>
+          </form>
         ) : (
           <section className="glass-panel rounded-[30px] p-6">
             <h2 className="text-xl font-semibold text-zinc-900">Raise dispute</h2>

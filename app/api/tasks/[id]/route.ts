@@ -6,7 +6,15 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const { id } = await params;
   const task = await db.task.findUnique({
     where: { id },
-    include: { requester: { select: { username: true, college: true } } },
+    include: { 
+      requester: { select: { username: true, college: true } },
+      ratings: {
+        include: {
+          author: { select: { username: true } }
+        },
+        orderBy: { createdAt: 'desc' }
+      }
+    },
   });
 
   if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
@@ -24,5 +32,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     status: task.status,
     format: task.format,
     college: task.college ?? task.requester.college,
+    ratings: task.ratings.map(rating => ({
+      id: rating.id,
+      score: rating.score,
+      review: rating.review,
+      author: rating.author,
+      createdAt: rating.createdAt.toISOString()
+    }))
   });
 }

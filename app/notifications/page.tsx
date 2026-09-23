@@ -1,16 +1,7 @@
-import Link from "next/link";
+"use client";
 
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/site-shell";
 
-export default function NotificationsPage() {
-  return (
-    <AppShell>
-      <section className="liquid-panel mx-auto max-w-3xl rounded-[30px] p-8 text-center">
-        <p className="genz-kicker justify-center">Notifications</p>
-        <h1 className="mt-3 text-3xl font-black text-[#172033]">You are all caught up.</h1>
-        <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-[#596477]">New offers, messages, task updates, and wallet events will appear here when they happen.</p>
-        <Link href="/browse" className="mt-6 inline-flex rounded-full bg-[#172033] px-5 py-3 text-sm font-black text-white">Explore tasks</Link>
-      </section>
-    </AppShell>
-  );
-}
+type Notice = { id: string; title: string; body: string; category: string; unread: boolean; createdAt: string };
+export default function NotificationsPage() { const [items, setItems] = useState<Notice[]>([]); useEffect(() => { fetch("/api/notifications").then((r) => r.ok ? r.json() : null).then((data) => data && setItems(data.notifications)); }, []); async function markRead() { await fetch("/api/notifications", { method: "PATCH" }); setItems((current) => current.map((item) => ({ ...item, unread: false }))); } return <AppShell><div className="mx-auto max-w-4xl space-y-6"><section className="liquid-panel flex flex-wrap items-center justify-between gap-3 rounded-[30px] p-6"><div><p className="genz-kicker">Notifications</p><h1 className="mt-3 text-3xl font-black text-[#172033]">Your updates</h1></div><button onClick={markRead} className="rounded-full bg-[#172033] px-4 py-3 text-sm font-black text-white">Mark all read</button></section><section className="space-y-3">{items.length ? items.map((item) => <article key={item.id} className={`liquid-panel rounded-2xl p-5 ${item.unread ? "border-emerald-300" : ""}`}><div className="flex justify-between gap-3"><div><h2 className="font-black text-[#172033]">{item.title}</h2><p className="mt-2 text-sm leading-6 text-[#596477]">{item.body}</p></div><span className="text-xs text-[#596477]">{new Date(item.createdAt).toLocaleDateString()}</span></div></article>) : <div className="liquid-panel rounded-[30px] p-8 text-center text-sm text-[#596477]">No notifications yet. Important task and withdrawal updates will appear here.</div>}</section></div></AppShell>; }

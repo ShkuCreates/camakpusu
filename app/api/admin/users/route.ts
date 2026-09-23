@@ -8,7 +8,16 @@ export async function GET() {
   if (!admin) return NextResponse.json({ error: "Admin access required" }, { status: 403 });
 
   const users = await db.user.findMany({
-    select: { id: true, username: true, email: true, college: true, role: true, createdAt: true },
+    select: { 
+      id: true, 
+      username: true, 
+      email: true, 
+      college: true, 
+      role: true, 
+      createdAt: true,
+      rating: true,
+      completedTasks: true
+    },
     orderBy: { createdAt: "desc" },
   });
   return NextResponse.json(users);
@@ -20,15 +29,79 @@ export async function PATCH(request: Request) {
 
   const body = await request.json().catch(() => null);
   const userId = typeof body?.userId === "string" ? body.userId : "";
-  const role = body?.role === "ADMIN" ? "ADMIN" : body?.role === "STUDENT" ? "STUDENT" : null;
-  if (!userId || !role) return NextResponse.json({ error: "A valid user and role are required." }, { status: 400 });
+  const action = typeof body?.action === "string" ? body.action : "";
+  
+  if (!userId || !action) return NextResponse.json({ error: "User ID and action are required." }, { status: 400 });
 
-  if (userId === admin.id && role !== "ADMIN") return NextResponse.json({ error: "You cannot remove your own admin access." }, { status: 400 });
+  if (userId === admin.id && action === "removeAdmin") {
+    return NextResponse.json({ error: "You cannot remove your own admin access." }, { status: 400 });
+  }
 
   try {
-    const user = await db.user.update({ where: { id: userId }, data: { role }, select: { id: true, role: true } });
-    return NextResponse.json(user);
-  } catch {
-    return NextResponse.json({ error: "User not found." }, { status: 404 });
+    let user;
+    
+    if (action === "makeAdmin") {
+      user = await db.user.update({ 
+        where: { id: userId }, 
+        data: { role: "ADMIN" },
+        select: { id: true, role: true, username: true }
+      });
+      await db.notification.create({
+        data: {
+          userId,
+          title: "Admin access granted",
+          body: "You have been granted admin access to CampusAid.",
+          category: "Admin"
+        }
+      });
+    } else if (action === "removeAdmin") {
+      user = await db.user.update({ 
+        where: { id: userId }, 
+        data: { role: "STUDENT" },
+        select: { id: true, role: true, username: true }
+      });
+      await db.notification.create({
+        data: {
+          userId,
+          title: "Admin access removed",
+          body: "Your admin access to CampusAid has been removed.",
+          category: "Admin"
+        }
+      });
+    } else if (action === "flagUser") {
+      await db.notification.create({
+        data: {
+          userId,
+          title: "Account flagged",
+          body: "Your account has been flagged by admin. Please contact support if you believe this is an error.",
+          category: "Admin"
+        }
+      });
+      user = await db.user.findUnique({
+        where: { id: userId },
+        select: { id: true, username: true, email: true }
+      });
+    } else if (action === "logoutUser") {
+      // Create a notification telling the user they've been logged out
+      await db.notification.create({
+        data: {
+          userId,
+          title: "Session terminated",
+          body: "An admin has terminated your current session. Please log in again.",
+          category: "Admin"
+        }
+      });
+      user = await db.user.findUnique({
+        where: { id: userId },
+        select: { id: true, username: true, email: true }
+      });
+    } else {
+      return NextResponse.json({ error: "Invalid action." }, { status: 400 });
+    }
+    
+    return NextResponse.json({ user, action });
+  } catch (error) {
+    console.error("Admin action failed:", error);
+    return NextResponse.json({ error: "Action failed. User not found or operation not permitted." }, { status: 404 });
   }
 }
